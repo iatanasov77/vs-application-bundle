@@ -1,16 +1,24 @@
 imports:
     - { resource: services/form.yaml }
+    - { resource: services/theme.yaml }
 
 parameters:
-#    ia_cms.example.class: IACmsBundle\Example
+    #ia_cms.example.class: IACmsBundle\Example
     menu.config_file: "%kernel.root_dir%/../config/packages/vs_application.yaml"
 
 services:
     _defaults:
         autowire: true
         autoconfigure: true
-        public: false
+        public: true
         
+    ###########################################################
+    # Theme services
+    ###########################################################
+    vs_app.site.theme.context:
+        class: Sylius\Bundle\ThemeBundle\Context\SettableThemeContext
+        arguments: ["@sylius.theme.hierarchy_provider"]
+    
     ###########################################################
     # Menu services
     ###########################################################
@@ -42,21 +50,6 @@ services:
         arguments: ["@knp_menu.factory"]
         tags:
             - { name: knp_menu.menu, alias: breadcrumbs }
-
-    ###########################################################
-    # Taxonomy services
-    ###########################################################
-    vs_app.form.type.taxonomy_vocabulary:
-        class: IACmsBundle\Form\TaxonomyVocabularyForm
-        tags:
-            - { name: form.type, alias: 'vs_app_taxonomy_vocabularies' }
-        arguments: ['@doctrine']
-        
-    vs_app.form.type.taxonomy_term:
-        class: IACmsBundle\Form\TaxonomyTermForm
-        tags:
-            - { name: form.type, alias: 'vs_app_taxonomy_terms' }
-        arguments: ['@doctrine']
         
     ##############################################################
     # Maintenance mode services

@@ -1,54 +1,46 @@
-<?php namespace IA\CmsBundle\Form;
+<?php namespace VS\ApplicationBundle\Form;
 
 use Sylius\Bundle\ResourceBundle\Form\Type\AbstractResourceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\ButtonType;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 
-use IA\CmsBundle\Entity\Repository\TaxonomyTermsRepository;
+use Doctrine\ORM\EntityRepository;
 
 class TaxonForm extends AbstractResourceType
 {
-
-    public function getName()
+    public function __construct( $dataClass )
     {
-        return 'ia_cms_taxonomy_terms';
+        parent::__construct( $dataClass );
     }
-
+    
     public function buildForm( FormBuilderInterface $builder, array $options )
-    {   
-        $vocabulary = $options['data']->getVocabulary();
+    {
         $builder
-            ->add( 'enabled', CheckboxType::class, ['label' => 'Enabled'] )
-            ->add( 'name', TextType::class, ['label' => 'Title'] )
-                 
-            ->add( 'parent', HiddenType::class )
-//            ->add('parent', 'entity', array(
-//                'required' => false,
-//                'label' => 'Parent',
-//                'class' => 'IATaxonomyBundle:Term',
-//                'attr' => array('class' => 'col-sm-8'),
-//                'empty_value' => 'Select a term',
-//                'property' => 'name',
-//                'multiple' => false,
-//                'expanded' => false ,
-//                'query_builder' => function (TermsRepository $r)
-//                {
-//                    $queryBuilder = $r->createQueryBuilder('t');
-//                    $query = $queryBuilder
-//                        ->where($queryBuilder->expr()->isNotNull('t.parent'))
-//                    ;
-//
-//                    return $query;
-//                }
-//            ))
+            ->add( 'currentLocale', HiddenType::class )
+
+            ->add( 'parentTaxon', EntityType::class, [
+                'mapped'        => false,
+                'required'      => true,
+                'label'         => 'Parent',
+                'class'         => $this->dataClass,
+                'choice_label'  => 'name',
+                'query_builder' => function ( EntityRepository $er ) use ( $options )
+                {
+                    //var_dump( $er ); die;
+                    return $er->createQueryBuilder( 't' )
+                                ->where( 't.root = :rootTaxon' )
+                                ->setParameter( 'rootTaxon', $options['rootTaxon'] );
+                }
+            ])
             
+            ->add( 'name', TextType::class, ['label' => 'Name'] )
             ->add( 'description', TextareaType::class, ['label' => 'Description', 'required' => false] )
                 
             ->add( 'btnSave', SubmitType::class, ['label' => 'Save'] )
@@ -58,10 +50,11 @@ class TaxonForm extends AbstractResourceType
 
     public function configureOptions( OptionsResolver $resolver ): void
     {
+        parent::configureOptions( $resolver );
+        
         $resolver->setDefaults([
-            'data_class' => 'IA\CmsBundle\Entity\TaxonomyTerm'
+            'rootTaxon' => null,
         ]);
     }
-
 }
 

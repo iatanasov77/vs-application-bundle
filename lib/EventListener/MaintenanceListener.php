@@ -5,7 +5,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 use VS\ApplicationBundle\Twig\Alerts;
-use VS\ApplicationBundle\Entity\GeneralSettings;
 
 class MaintenanceListener
 {
@@ -25,12 +24,12 @@ class MaintenanceListener
     public function onKernelRequest(GetResponseEvent $event)
     {
         $schema             = $this->container->get( 'doctrine' )->getConnection()->getSchemaManager();
-        if ( $schema->tablesExist( ['IACORE_GeneralSettings'] ) == false ) {
-            Alerts::$WARNINGS[]   = 'The table IACORE_GeneralSettings does not exists !';
+        if ( $schema->tablesExist( ['VSAPP_Settings'] ) == false ) {
+            Alerts::$WARNINGS[]   = 'The table VSAPP_Settings does not exists !';
             return;
         }
         
-        $repo               = $this->container->get( 'doctrine' )->getRepository( GeneralSettings::class );
+        $repo               = $this->container->get( 'vs_application.repository.settings' );
         $settings           = $repo->findBy( [], ['id'=>'DESC'], 1, 0 );
         $maintenanceMode    = false;
         $maintenancePage    = false;
@@ -46,6 +45,8 @@ class MaintenanceListener
         
         // If maintenance is active and in prod environment and user is not admin
         if ( $maintenanceMode ) {
+            // Use this for DEBUG
+            // if( true ) {
             if (
                 ( ! $this->user || ! $this->user->hasRole( 'ROLE_ADMIN' ) )
                 && ! $debug

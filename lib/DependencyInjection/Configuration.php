@@ -5,25 +5,26 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 
 use Sylius\Bundle\ResourceBundle\SyliusResourceBundle;
-//use Sylius\Bundle\ResourceBundle\Doctrine\ORM\EntityRepository as SyliusEntityRepository;
 use Sylius\Component\Resource\Model\ResourceInterface;
 use Sylius\Component\Resource\Factory\Factory;
 
-use VS\ApplicationBundle\Model\Site;
-use VS\ApplicationBundle\Controller\SiteController;
+use VS\ApplicationBundle\Model\SiteSettings;
 use VS\ApplicationBundle\Form\SiteForm;
 
+use VS\ApplicationBundle\Repository\SettingsRepository;
 use VS\ApplicationBundle\Model\Settings;
-use VS\ApplicationBundle\Controller\GeneralSettingsController;
-use VS\ApplicationBundle\Form\GeneralSettingsForm;
+use VS\ApplicationBundle\Controller\SettingsController;
+use VS\ApplicationBundle\Form\SettingsForm;
 
+use VS\ApplicationBundle\Repository\TaxonomyRepository;
 use VS\ApplicationBundle\Model\Taxonomy;
 use VS\ApplicationBundle\Controller\TaxonomyController;
 use VS\ApplicationBundle\Form\TaxonomyForm;
 
+use VS\ApplicationBundle\Repository\TaxonRepository;
 use VS\ApplicationBundle\Model\Taxon;
-use VS\ApplicationBundle\Controller\TaxonController;
 use VS\ApplicationBundle\Form\TaxonForm;
+use Sylius\Component\Taxonomy\Model\TaxonTranslation;
 
 /**
  * This is the class that validates and merges configuration from your app/config files
@@ -40,18 +41,25 @@ class Configuration implements ConfigurationInterface
         $treeBuilder    = new TreeBuilder( 'vs_application' );
         $rootNode       = $treeBuilder->getRootNode();
         
+        // Main Config
         $rootNode
             ->children()
+                ->booleanNode( 'multi_site' )->defaultFalse()->end()
                 ->scalarNode( 'orm_driver' )->defaultValue( SyliusResourceBundle::DRIVER_DOCTRINE_ORM )->cannotBeEmpty()->end()
+                ->arrayNode( 'taxonomy' )
+                    ->scalarPrototype()->end()
+                ->end()
             ->end()
         ;
         
+        // Menu Config
         $rootNode
             ->children()
                 ->variableNode( 'menu' )->end()
             ->end()
         ;
         
+        // Resources Config
         $this->addResourcesSection( $rootNode );
             
         return $treeBuilder;
@@ -64,16 +72,16 @@ class Configuration implements ConfigurationInterface
                 ->arrayNode( 'resources' )
                     ->addDefaultsIfNotSet()
                     ->children()
-                        ->arrayNode( 'site' )
+                        ->arrayNode( 'site_settings' )
                             ->addDefaultsIfNotSet()
                             ->children()
                                 ->variableNode( 'options' )->end()
                                 ->arrayNode( 'classes' )
                                     ->addDefaultsIfNotSet()
                                     ->children()
-                                        ->scalarNode( 'model' )->defaultValue( Site::class )->cannotBeEmpty()->end()
+                                        ->scalarNode( 'model' )->defaultValue( SiteSettings::class )->cannotBeEmpty()->end()
                                         ->scalarNode( 'interface' )->defaultValue( ResourceInterface::class )->cannotBeEmpty()->end()
-                                        ->scalarNode( 'controller' )->defaultValue( SiteController::class )->cannotBeEmpty()->end()
+                                        ->scalarNode( 'controller' )->cannotBeEmpty()->end()
                                         ->scalarNode( 'repository' )->cannotBeEmpty()->end()
                                         ->scalarNode( 'factory' )->defaultValue( Factory::class )->cannotBeEmpty()->end()
                                         ->scalarNode( 'form' )->defaultValue( SiteForm::class )->cannotBeEmpty()->end()
@@ -90,10 +98,11 @@ class Configuration implements ConfigurationInterface
                                     ->children()
                                         ->scalarNode( 'model' )->defaultValue( Settings::class )->cannotBeEmpty()->end()
                                         ->scalarNode( 'interface' )->defaultValue( ResourceInterface::class )->cannotBeEmpty()->end()
-                                        ->scalarNode( 'controller' )->defaultValue( GeneralSettingsController::class )->cannotBeEmpty()->end()
-                                        ->scalarNode( 'repository' )->cannotBeEmpty()->end()
+                                        ->scalarNode( 'controller' )->defaultValue( SettingsController::class )->cannotBeEmpty()->end()
+                                        ->scalarNode( 'repository' )->defaultValue( SettingsRepository::class )->cannotBeEmpty()->end()
+                                        //->scalarNode( 'repository' )->cannotBeEmpty()->end()
                                         ->scalarNode( 'factory' )->defaultValue( Factory::class )->cannotBeEmpty()->end()
-                                        ->scalarNode( 'form' )->defaultValue( GeneralSettingsForm::class )->cannotBeEmpty()->end()
+                                        ->scalarNode( 'form' )->defaultValue( SettingsForm::class )->cannotBeEmpty()->end()
                                     ->end()
                                 ->end()
                             ->end()
@@ -108,7 +117,8 @@ class Configuration implements ConfigurationInterface
                                         ->scalarNode( 'model' )->defaultValue( Taxonomy::class )->cannotBeEmpty()->end()
                                         ->scalarNode( 'interface' )->defaultValue( ResourceInterface::class )->cannotBeEmpty()->end()
                                         ->scalarNode( 'controller' )->defaultValue( TaxonomyController::class )->cannotBeEmpty()->end()
-                                        ->scalarNode( 'repository' )->cannotBeEmpty()->end()
+                                        //->scalarNode( 'repository' )->cannotBeEmpty()->end()
+                                        ->scalarNode( 'repository' )->defaultValue( TaxonomyRepository::class )->cannotBeEmpty()->end()
                                         ->scalarNode( 'factory' )->defaultValue( Factory::class )->cannotBeEmpty()->end()
                                         ->scalarNode( 'form' )->defaultValue( TaxonomyForm::class )->cannotBeEmpty()->end()
                                     ->end()
@@ -122,12 +132,24 @@ class Configuration implements ConfigurationInterface
                                 ->arrayNode( 'classes' )
                                     ->addDefaultsIfNotSet()
                                     ->children()
-                                        ->scalarNode( 'model' )->defaultValue( Taxonomy::class )->cannotBeEmpty()->end()
+                                        ->scalarNode( 'model' )->defaultValue( Taxon::class )->cannotBeEmpty()->end()
                                         ->scalarNode( 'interface' )->defaultValue( ResourceInterface::class )->cannotBeEmpty()->end()
-                                        ->scalarNode( 'controller' )->defaultValue( TaxonomyController::class )->cannotBeEmpty()->end()
-                                        ->scalarNode( 'repository' )->cannotBeEmpty()->end()
+                                        ->scalarNode( 'controller' )->cannotBeEmpty()->end()
+                                        //->scalarNode( 'repository' )->cannotBeEmpty()->end()
+                                        ->scalarNode( 'repository' )->defaultValue( TaxonRepository::class )->cannotBeEmpty()->end()
                                         ->scalarNode( 'factory' )->defaultValue( Factory::class )->cannotBeEmpty()->end()
-                                        ->scalarNode( 'form' )->defaultValue( TaxonomyForm::class )->cannotBeEmpty()->end()
+                                        ->scalarNode( 'form' )->defaultValue( TaxonForm::class )->cannotBeEmpty()->end()
+                                    ->end()
+                                ->end()
+                                ->arrayNode( 'translation' )
+                                    ->addDefaultsIfNotSet()
+                                    ->children()
+                                        ->arrayNode( 'classes' )
+                                            ->addDefaultsIfNotSet()
+                                            ->children()
+                                                ->scalarNode( 'model' )->defaultValue( TaxonTranslation::class )->cannotBeEmpty()->end()
+                                            ->end()
+                                        ->end()
                                     ->end()
                                 ->end()
                             ->end()

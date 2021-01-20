@@ -1,38 +1,28 @@
 <?php namespace VS\ApplicationBundle\Model;
 
-use Doctrine\ORM\Mapping as ORM;
-use Sylius\Component\Resource\Model\ResourceInterface;
+use VS\ApplicationBundle\Model\Interfaces\SettingsInterface;
 use VS\ApplicationBundle\Model\Interfaces\PageInterface;
+use VS\ApplicationBundle\Model\Interfaces\SiteSettingsInterface;
 
-class Settings implements ResourceInterface
+class Settings implements SettingsInterface
 {   
-    /**
-     * @var integer
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     */
+    /** @var integer */
     protected $id;
 
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="maintenanceMode", type="boolean", options={"default":"0"}, nullable=false)
-     */
+    /** @var boolean */
     protected $maintenanceMode;
     
-    /**
-     * @ORM\OneToOne(targetEntity="VS\ApplicationBundle\Model\Interfaces\PageInterface")
-     */
+    /** @var VS\ApplicationBundle\Model\Interfaces\PageInterface */
     protected $maintenancePage;
 
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="languages", type="string")
-     */
-    protected $languages;
+    /** @var string */
+    protected $language;
+    
+    /** @var string */
+    protected $theme;
+    
+    /** @var SiteSettingsInterface */
+    protected $site;
     
     public function getId()
     {
@@ -63,15 +53,39 @@ class Settings implements ResourceInterface
         return $this;
     }
     
-    public function setLanguages($languages)
+    public function setLanguage($language)
     {
-        $this->languages = $languages;
+        $this->language = $language;
         
         return $this;
     }
     
-    public function getLanguages()
+    public function getLanguage()
     {
-        return $this->languages;
+        return $this->language;
+    }
+    
+    public function setTheme($theme)
+    {
+        $this->theme = $theme;
+        
+        return $this;
+    }
+    
+    public function getTheme()
+    {
+        return $this->theme;
+    }
+    
+    public function getSite(): ?SiteSettingsInterface
+    {
+        return $this->site;
+    }
+    
+    public function setSite(?SiteSettingsInterface $site): self
+    {
+        $this->site = $site;
+        
+        return $this;
     }
 }
