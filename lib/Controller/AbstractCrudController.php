@@ -23,13 +23,18 @@ class AbstractCrudController extends ResourceController
             $view
                 ->setTemplate( $configuration->getTemplate( ResourceActions::INDEX . '.html' ) )
                 ->setTemplateVar( $this->metadata->getName() )
-                ->setData([
-                    'configuration'             => $configuration,
-                    'metadata'                  => $this->metadata,
-                    'resource'                  => $resource,
-                    $this->metadata->getName()  => $resource,
-                    'items'                     => $this->getRepository()->findAll(),
-                ])
+                ->setData(
+                    array_merge(
+                        [
+                            'configuration'             => $configuration,
+                            'metadata'                  => $this->metadata,
+                            'resource'                  => $resource,
+                            $this->metadata->getName()  => $resource,
+                            'items'                     => $this->getRepository()->findAll(),
+                        ],
+                        $this->customData()
+                    )
+                )
             ;
         }
         
@@ -73,14 +78,14 @@ class AbstractCrudController extends ResourceController
             }
         }
         
-        $view   = View::create()
-            ->setTemplate( $configuration->getTemplate( ResourceActions::UPDATE . '.html' ) )
-            ->setData( array_merge( [
+        if ($configuration->isHtmlRequest()) {
+            return $this->render( $configuration->getTemplate( ResourceActions::UPDATE . '.html' ), array_merge( [
                 'item' => $entity,
                 'form' => $form->createView(),
-            ], $this->customData() ) )
-        ;
-        return $this->viewHandler->handle( $configuration, $view );
+            ], $this->customData() ) );
+        }
+        
+        return $this->createRestView( $configuration, $entity );
     }
     
     protected function classInfo( Request $request )
@@ -98,7 +103,7 @@ class AbstractCrudController extends ResourceController
         }
     }
     
-    protected function prepareEntity( &$entity, $form, Request $request )
+    protected function prepareEntity( &$entity, &$form, Request $request )
     {
         
     }

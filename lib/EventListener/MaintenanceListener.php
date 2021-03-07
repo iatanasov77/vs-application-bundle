@@ -10,10 +10,12 @@ class MaintenanceListener
 {
     protected $container;
     protected $user;
+    protected $siteId;
     
-    public function __construct( ContainerInterface $container )
+    public function __construct( ContainerInterface $container, int $siteId = null )
     {
         $this->container    = $container;
+        $this->siteId       = $siteId;
         
         $token              = $this->container->get( 'security.token_storage' )->getToken();
         if ( $token ) {
@@ -23,21 +25,22 @@ class MaintenanceListener
     
     public function onKernelRequest(GetResponseEvent $event)
     {
-        $schema             = $this->container->get( 'doctrine' )->getConnection()->getSchemaManager();
-        if ( $schema->tablesExist( ['VSAPP_Settings'] ) == false ) {
-            Alerts::$WARNINGS[]   = 'The table VSAPP_Settings does not exists !';
-            return;
-        }
+        // $schema             = $this->container->get( 'doctrine' )->getConnection()->getSchemaManager();
+        // if ( $schema->tablesExist( ['VSAPP_Settings'] ) == false ) {
+        //     Alerts::$WARNINGS[]   = 'The table VSAPP_Settings does not exists !';
+        //     return;
+        // }
         
         $repo               = $this->container->get( 'vs_application.repository.settings' );
-        $settings           = $repo->findBy( [], ['id'=>'DESC'], 1, 0 );
+
+        $settings           = $repo->getSettings( $this->siteId );
         $maintenanceMode    = false;
         $maintenancePage    = false;
         $debug              = false;
         
-        if( isset( $settings[0] ) ) {
-            $maintenanceMode    = $settings[0]->getMaintenanceMode();
-            $maintenancePage    = $settings[0]->getMaintenancePage();
+        if( isset( $settings ) ) {
+            $maintenanceMode    = $settings->getMaintenanceMode();
+            $maintenancePage    = $settings->getMaintenancePage();
             
             // This will detect if we are in dev environment
             $debug              = in_array( $this->container->get('kernel')->getEnvironment(), ['dev'] );
