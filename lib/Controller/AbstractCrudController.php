@@ -19,29 +19,20 @@ class AbstractCrudController extends ResourceController
         $configuration = $this->requestConfigurationFactory->create( $this->metadata, $request );
         
         $this->isGrantedOr403( $configuration, ResourceActions::INDEX );
-        $resource = $this->findOr404( $configuration );
+        $resources = $this->findOr404( $configuration );
         
         $view = View::create( $resource );
-        if ($configuration->isHtmlRequest()) {
-            $view
-                ->setTemplate( $configuration->getTemplate( ResourceActions::INDEX . '.html' ) )
-                ->setTemplateVar( $this->metadata->getName() )
-                ->setData(
-                    array_merge(
-                        [
-                            'configuration'             => $configuration,
-                            'metadata'                  => $this->metadata,
-                            'resource'                  => $resource,
-                            $this->metadata->getName()  => $resource,
-                            'items'                     => $this->getRepository()->findAll(),
-                        ],
-                        $this->customData()
-                    )
-                )
-            ;
+        if ( $configuration->isHtmlRequest() ) {
+            
+            return $this->render( $configuration->getTemplate(ResourceActions::INDEX . '.html'), [
+                'configuration'                     => $configuration,
+                'metadata'                          => $this->metadata,
+                'resources'                         => $resources,
+                $this->metadata->getPluralName()    => $resources,
+            ]);
         }
         
-        return $this->viewHandler->handle( $configuration, $view );
+        return $this->createRestView( $configuration, $resources );
     }
     
     public function createAction( Request $request ) : Response
