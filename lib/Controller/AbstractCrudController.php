@@ -26,12 +26,18 @@ class AbstractCrudController extends ResourceController
         
         if ( $configuration->isHtmlRequest() ) {
             
-            return $this->render( $configuration->getTemplate(ResourceActions::INDEX . '.html'), [
-                'configuration'                     => $configuration,
-                'metadata'                          => $this->metadata,
-                'resources'                         => $resources,
-                $this->metadata->getPluralName()    => $resources,
-            ]);
+            return $this->render( $configuration->getTemplate( ResourceActions::INDEX . '.html' ),
+                array_merge(
+                    [
+                        'configuration'                     => $configuration,
+                        'metadata'                          => $this->metadata,
+                        'resources'                         => $resources,  // May be the same like 'items'
+                        $this->metadata->getPluralName()    => $resources,
+                        'items'                             => $this->getRepository()->findAll(),
+                    ],
+                    $this->customData()
+                )
+            );
         }
         
         return $this->createRestView( $configuration, $resources );
