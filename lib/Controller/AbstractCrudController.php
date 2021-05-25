@@ -16,12 +16,14 @@ class AbstractCrudController extends ResourceController
     public function indexAction( Request $request ) : Response
     {
         $this->classInfo( $request );   // call this for every controller action
+        
         $configuration = $this->requestConfigurationFactory->create( $this->metadata, $request );
         
         $this->isGrantedOr403( $configuration, ResourceActions::INDEX );
-        $resources = $this->findOr404( $configuration );
+        $resources = $this->resourcesCollectionProvider->get( $configuration, $this->repository );
         
-        $view = View::create( $resource );
+        $this->eventDispatcher->dispatchMultiple( ResourceActions::INDEX, $configuration, $resources );
+        
         if ( $configuration->isHtmlRequest() ) {
             
             return $this->render( $configuration->getTemplate(ResourceActions::INDEX . '.html'), [
