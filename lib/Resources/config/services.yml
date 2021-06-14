@@ -6,10 +6,17 @@ imports:
     - { resource: services/menu.yaml }
     - { resource: services/i18n.yaml }
     - { resource: services/doctrine_extensions.yaml }
+    - { resource: services/commands.yaml }
+    - { resource: services/installer.yaml }
+    - { resource: services/installer_requirements.yaml }
+    - { resource: services/fixtures_factories.yaml }
+    - { resource: services/fixtures_listeners.yaml }
+    - { resource: services/fixtures.yaml }
 
 parameters:
-    menu.config_file: "%kernel.root_dir%/../config/packages/vs_application.yaml"
-    vs_app.settings.site_id: null
+    vs_application.menu.config_file: "%kernel.project_dir%/../config/packages/vs_application.yaml"
+    vs_application.public_dir: "%kernel.project_dir%/public/admin_panel"
+    vs_application.settings.site_id: null
     vs_application.supress_pdo_exception: false
 
 services:
@@ -18,31 +25,10 @@ services:
         autoconfigure: true
         public: true
     
+    ##############################################################
+    # AuthController
+    ##############################################################
     VS\ApplicationBundle\Controller\AuthController:
         tags: ['controller.service_arguments']
         autowire: false
-            
-    ##############################################################
-    # Console commands
-    ##############################################################
-    vs_app.command.maintenance:
-        class: VS\ApplicationBundle\Command\MaintenanceModeCommand
-        tags:
-            - 'console.command'
-            
-    vs_app.command.bumpversion:
-        class: VS\ApplicationBundle\Command\BumpVersionCommand
-        tags:
-            - 'console.command'
-    vs_app.command.assets.sources:
-        class: VS\ApplicationBundle\Command\AssetsSourcesCommand
-        arguments:
-            - '@filesystem'
-        tags:
-            - 'console.command'
-    vs_app.command.assets.dependencies:
-        class: VS\ApplicationBundle\Command\CheckAssetDependenciesCommand
-        arguments:
-            - '@filesystem'
-        tags:
-            - 'console.command'
+
