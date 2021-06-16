@@ -3,22 +3,21 @@
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use VS\ApplicationBundle\DataFixtures\AbstractResourceFixture;
 
-final class GeneralSettingsFixture extends AbstractResourceFixture
+final class PageCategoriesFixture extends AbstractResourceFixture
 {
     public function getName(): string
     {
-        return 'general_settings';
+        return 'pages_categories';
     }
     
     protected function configureResourceNode( ArrayNodeDefinition $resourceNode ): void
     {
         $resourceNode
             ->children()
-                ->booleanNode( 'maintenanceMode' )->defaultFalse()->end()
-                
-                ->scalarNode( 'theme' )->end()
-                ->scalarNode( 'site' )->end()
-                ->scalarNode( 'maintenancePage' )->end()
+                ->scalarNode( 'locale' )->end()
+                ->scalarNode( 'title' )->end()
+                ->scalarNode( 'taxonomy_title' )->end()
+                ->scalarNode( 'taxonomy_description' )->end()
         ;
     }
 }

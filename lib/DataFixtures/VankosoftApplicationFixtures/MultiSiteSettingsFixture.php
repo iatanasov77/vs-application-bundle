@@ -3,11 +3,11 @@
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use VS\ApplicationBundle\DataFixtures\AbstractResourceFixture;
 
-final class GeneralSettingsFixture extends AbstractResourceFixture
+final class MultiSiteSettingsFixture extends AbstractResourceFixture
 {
     public function getName(): string
     {
-        return 'general_settings';
+        return 'multisite_settings';
     }
     
     protected function configureResourceNode( ArrayNodeDefinition $resourceNode ): void
@@ -15,9 +15,9 @@ final class GeneralSettingsFixture extends AbstractResourceFixture
         $resourceNode
             ->children()
                 ->booleanNode( 'maintenanceMode' )->defaultFalse()->end()
+                ->scalarNode( 'site' )->end()
                 
                 ->scalarNode( 'theme' )->end()
-                ->scalarNode( 'site' )->end()
                 ->scalarNode( 'maintenancePage' )->end()
         ;
     }
