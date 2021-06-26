@@ -1,7 +1,12 @@
 {% extends "@VSApplication/layout.html.twig" %}
-{% block title %}{{ parent() }} :: List Vocabularies{% endblock %}
 
-{% block pageTitle %}<i class="icon_genius"></i> List Vocabularies{% endblock %}
+{# Import Macros #}
+{% import "@VSApplication/Macros/alerts.html.twig" as alerts %}
+{% from "@VSApplication/Macros/misc.html.twig" import pagination %}
+
+{% block title %}{{ parent() }} :: {{ 'vs_application.template.taxonomy_index_title' | trans( {},'VSApplicationBundle' ) }}{% endblock %}
+
+{% block pageTitle %}<i class="icon_genius"></i> {{ 'vs_application.template.taxonomy_index_title' | trans( {},'VSApplicationBundle' ) }}{% endblock %}
 
 {% block content %}
     <div class="container-fluid  dashboard-content">
