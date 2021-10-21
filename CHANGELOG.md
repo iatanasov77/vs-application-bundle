@@ -1,3 +1,9 @@
+1.4.0	|	Release date: **21.10.2021**
+============================================
+* New Features:
+  - Add FavIcon to the AdminPanel Layout.
+
+
 1.3.10	|	Release date: **18.10.2021**
 ============================================
 * Bug-Fixes:
