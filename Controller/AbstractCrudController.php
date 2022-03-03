@@ -2,18 +2,25 @@
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use FOS\RestBundle\View\View;
 use Sylius\Bundle\ResourceBundle\Controller\ResourceController;
 use Sylius\Component\Resource\ResourceActions;
+use Pagerfanta\Pagerfanta;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\ORMException;
+
+use Vankosoft\ApplicationBundle\Component\Status;
 
 class AbstractCrudController extends ResourceController
 {
     protected $classInfo;
     
     protected $currentRequest;
+    
+    /** @var Pagerfanta $resources */
+    protected $resources;
     
     public function indexAction( Request $request ) : Response
     {
@@ -23,16 +30,16 @@ class AbstractCrudController extends ResourceController
         $configuration = $this->requestConfigurationFactory->create( $this->metadata, $request );
         
         $this->isGrantedOr403( $configuration, ResourceActions::INDEX );
-        $resources = $this->resourcesCollectionProvider->get( $configuration, $this->repository );
+        $this->resources    = $this->resourcesCollectionProvider->get( $configuration, $this->repository );
         if (
             $this->metadata->getParameters()['classes']['interface'] == 'Vankosoft\ApplicationBundle\Model\Interfaces\TaxonRelationInterface'
         ) {
-            foreach ( $resources as $r ) {
+            foreach ( $this->resources as $r ) {
                 $r->setCurrentLocale( $request->getLocale() );
             }
         }
         
-        $this->eventDispatcher->dispatchMultiple( ResourceActions::INDEX, $configuration, $resources );
+        $this->eventDispatcher->dispatchMultiple( ResourceActions::INDEX, $configuration, $this->resources );
         
         if ( $configuration->isHtmlRequest() ) {
             return $this->render( $configuration->getTemplate( ResourceActions::INDEX . '.html' ), 
@@ -40,8 +47,10 @@ class AbstractCrudController extends ResourceController
                     [
                         'configuration'                     => $configuration,
                         'metadata'                          => $this->metadata,
-                        'resources'                         => $resources,
-                        $this->metadata->getPluralName()    => $resources,
+                        'resources'                         => $this->resources,
+                        $this->metadata->getPluralName()    => $this->resources,
+                        
+                        /** @TODO Make Admin Panel To Use Paginated Rsources and Remove This */
                         'items'                             => $this->getRepository()->findAll(),
                     ],
                     $this->customData( $request )
@@ -49,7 +58,7 @@ class AbstractCrudController extends ResourceController
             );
         }
         
-        return $this->createRestView( $configuration, $resources );
+        return $this->createRestView( $configuration, $this->resources );
     }
     
     public function createAction( Request $request ) : Response
@@ -81,11 +90,17 @@ class AbstractCrudController extends ResourceController
             $em->persist( $entity );
             $em->flush();
             
-            $routesPrefix   = $this->classInfo['bundle'] . '_' . $this->classInfo['controller'];
-            if ( $form->getClickedButton() && 'btnApply' === $form->getClickedButton()->getName() ) {
-                return $this->redirect( $this->generateUrl( $routesPrefix . '_update', ['id' => $entity->getId()] ) );
+            if( $request->isXmlHttpRequest() ) {
+                return new JsonResponse([
+                    'status'   => Status::STATUS_OK
+                ]);
             } else {
-                return $this->redirect( $this->generateUrl( $routesPrefix . '_index' ) );
+                $routesPrefix   = $this->classInfo['bundle'] . '_' . $this->classInfo['controller'];
+                if ( $form->getClickedButton() && 'btnApply' === $form->getClickedButton()->getName() ) {
+                    return $this->redirect( $this->generateUrl( $routesPrefix . '_update', ['id' => $entity->getId()] ) );
+                } else {
+                    return $this->redirect( $this->generateUrl( $routesPrefix . '_index' ) );
+                }
             }
         }
         
