@@ -3,8 +3,45 @@
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Gedmo\Tree\Entity\Repository\NestedTreeRepository;
 
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\ClassMetadata;
+use Gedmo\Exception\UnexpectedValueException;
+
 class TaxonRepository extends NestedTreeRepository
 {
+    protected string $rootDir;
+    protected ?\Exception $exception;
+    
+    public function __construct( EntityManagerInterface $em, ClassMetadata $class )
+    {
+        $this->exception    = null;
+        try {
+            parent::__construct( $em, $class );
+        } catch ( UnexpectedValueException $e ) {
+            $this->exception    = $e;
+        }
+    }
+    
+    public function setRootDir( string $rootDir )
+    {
+        $this->rootDir	= $rootDir;
+    }
+    
+    public function throwException( bool $throwException )
+    {
+        if( $this->exception ) {
+            file_put_contents( $this->rootDir . '/var/dumpTaxonRepositoryException', $this->exception->getMessage() . "\n\n" . $this->exception->getTraceAsString() );
+            if ( $throwException ) {
+                throw $this->exception;
+            }
+        }
+    }
+    
+    public function findByCode( $code )
+    {
+        return $this->findOneBy( ['code' => $code] );
+    }
+    
     public function getTaxonsAsArray( $rootTaxonId, $parentId )
     {
         $em     = $this->getEntityManager();
@@ -22,9 +59,11 @@ class TaxonRepository extends NestedTreeRepository
         }
         
         $statement = $em->getConnection()->prepare( $sql );
-        $statement->execute( $params); 
+        foreach ( $params as $key => $val ) {
+            $statement->bindParam( $key, $val );
+        }
         
-        return $statement->fetchAll();
+        return $statement->executeQuery()->fetchAllAssociative();
     }
     
     /*

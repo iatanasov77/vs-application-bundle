@@ -9,7 +9,8 @@ trait TaxonomyHelperTrait
         $taxon->setCurrentLocale( $locale );
         $taxon->setName( $name );
         
-        $slug   = $this->get( 'vs_application.slug_generator' )->generate( $name );
+        $slug   = $this->createTaxonCode( $name );
+        
         $taxon->setCode( $slug );
         $taxon->setSlug( $slug );
         
@@ -20,5 +21,19 @@ trait TaxonomyHelperTrait
         $taxon->setParent( $parent );
         
         return $taxon;
+    }
+    
+    protected function createTaxonCode( $taxonName )
+    {
+        $code           = $this->get( 'vs_application.slug_generator' )->generate( $taxonName );
+        $useThisCode    = $code;
+        $i              = 0;
+        
+        while( $this->get( 'vs_application.repository.taxon' )->findByCode( $useThisCode ) ) {
+            $i++;
+            $useThisCode    = $code . '-' . $i;
+        }
+        
+        return $useThisCode;
     }
 }
