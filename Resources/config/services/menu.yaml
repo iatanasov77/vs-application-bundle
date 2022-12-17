@@ -22,8 +22,7 @@ services:
             - "@router"
             - "@parameter_bag"
             - "@translator"
-        calls:
-          - [ setContainer ]
+            - '@request_stack'
             
     vs_app.profile_menu:
         class: Knp\Menu\MenuItem

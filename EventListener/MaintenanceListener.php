@@ -9,7 +9,10 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Twig\Environment;
+
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 use Vankosoft\ApplicationBundle\Twig\Alerts;
 
@@ -34,7 +37,7 @@ class MaintenanceListener
     public function __construct(
         ContainerInterface $container,
         Environment $twig,
-        FlashBagInterface $flash,
+        RequestStack $requestStack,
         TokenStorageInterface $tokenStorage,
         int $applicationId = null,
         ?string $applicationLayout
@@ -43,7 +46,15 @@ class MaintenanceListener
         $this->applicationLayout    = $applicationLayout;
         $this->container            = $container;
         $this->twig                 = $twig;
-        $this->flash                = $flash;
+        
+        if ( $requestStack->getMainRequest()->hasSession() ) {
+            $this->flash                = $requestStack->getMainRequest()->getSession()->getFlashBag();
+        } else {
+            $session    = new Session();
+            $session->start();
+            
+            $requestStack->getMainRequest()->setSession( $session );
+        }
         
         $token                      = $tokenStorage->getToken();
         if ( $token ) {
