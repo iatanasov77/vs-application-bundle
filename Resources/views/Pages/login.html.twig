@@ -7,13 +7,13 @@
     <div class="card-header text-center">
     	<a class="navbar-brand" href="/">
     		<!-- <img class="logo-img" src="{{ asset('assets/build/new-template/images/logo.png') }}" alt="logo"> -->
-    		{{ 'VankoSoft Application' | trans }}<br />
-    		{{ applicationTitle }}
+    		{{ applicationCompany | trans( {},'VSApplicationBundle' ) }}<br />
+            {{ applicationTitle | trans( {},'VSApplicationBundle' ) }}
     	</a>
-    	<span class="splash-description">Please enter your username and password.</span>
+    	<span class="splash-description">{{ 'vs_application.form.login.sub_title' | trans( {},'VSApplicationBundle' ) }}</span>
     	
         {% if error %}
-        	<div class="alert alert-danger mt-4 float-left text-left w-100" role="alert">
+        	<div class="alert alert-danger mt-4 float-start text-left w-100" role="alert">
                 <span>{{ error.messageKey|trans(error.messageData, 'security') }}</span>
             </div>
         {% endif %}
@@ -24,14 +24,25 @@
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}" />
             
             <div class="form-group">
-                <input type="text" class="form-control form-control-lg" placeholder="Username" autofocus id="username" name="_username" value="{{ last_username }}" />
+                <input type="text" class="form-control form-control-lg"
+                    placeholder="{{ 'vs_application.form.login.username_placeholder' | trans( {},'VSApplicationBundle' ) }}"
+                    autofocus id="username" name="_username" value="{{ last_username }}"
+                />
             </div>
             <div class="form-group">
-                <input type="password" class="form-control form-control-lg" placeholder="Password" id="password" name="_password" />
+                <div class="position-relative auth-pass-inputgroup mb-3">
+                    <input type="password" class="form-control form-control-lg password-input"
+                        placeholder="{{ 'vs_application.form.login.password_placeholder' | trans( {},'VSApplicationBundle' ) }}"
+                        id="password" name="_password"
+                    />
+                    <button class="btn btn-link position-absolute end-0 text-decoration-none text-muted password-addon loginPasswordAddon" type="button" id="password-addon">
+                        <i class="ri-eye-fill align-middle"></i>
+                    </button>
+                </div>
             </div>
             <div class="form-group">
             	<label class="custom-control custom-checkbox">
-                    <input class="custom-control-input" type="checkbox" value="remember-me">
+                    <input class="custom-control-input" type="checkbox" name="_remember_me" />
                     <span class="custom-control-label">{{ 'vs_application.form.login.remember_me' | trans( {},'VSApplicationBundle' ) }}</span>
             	</label>
             </div>

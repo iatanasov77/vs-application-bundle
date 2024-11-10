@@ -29,8 +29,8 @@ use Doctrine\ORM\EntityRepository;
 use Vankosoft\ApplicationBundle\Maker\Renderer\FormTypeRenderer;
 
 use Vankosoft\ApplicationBundle\Model\Interfaces\ApplicationInterface;
-use Vankosoft\ApplicationBundle\Repository\ApplicationRepositoryInterface;
-use Vankosoft\ApplicationBundle\Repository\SettingsRepositoryInterface;
+use Vankosoft\ApplicationBundle\Repository\Interfaces\ApplicationRepositoryInterface;
+use Vankosoft\ApplicationBundle\Repository\Interfaces\SettingsRepositoryInterface;
 use Vankosoft\ApplicationBundle\Component\SlugGenerator;
 
 /*
@@ -89,7 +89,7 @@ abstract class AbstractResourceMaker extends AbstractMaker
         // TODO: Implement configureDependencies() method.
     }
     
-    public function interact( InputInterface $input, ConsoleStyle $io, Command $command )
+    public function interact( InputInterface $input, ConsoleStyle $io, Command $command ): void
     {
         $io->title( 'Create the CRUD Resource classes...' );
         

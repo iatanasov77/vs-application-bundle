@@ -1,7 +1,12 @@
 {% macro easyuiCombobox( twigWidget, dataSourceUrl, dataValue, options ) %}
     {% set comboDataOptions    = "
-            url:'" ~ dataSourceUrl ~ 
-            "', required:" ~ options.required ~", multiple : " ~ options.multiple ~", checkbox : " ~ options.checkbox ~", prompt:'" ~ options.placeholder ~"',
+            url:'" ~ dataSourceUrl ~ "',
+            required:" ~ options.required ~ ",
+            multiple : " ~ options.multiple ~ ",
+            checkbox : " ~ options.checkbox ~ ",
+            cascadeCheck: " ~ options.cascadeCheck ~ ",
+            prompt:'" ~ options.placeholder ~ "',
+            
             onBeforeLoad:function( node ) {
                 //showSpiner
             },
@@ -17,6 +22,8 @@
     {% else %}
         {% set additionalClass = ''  %}
     {% endif %}
+    
+    {# Dont Use on required Fields #}
     {{ form_widget( twigWidget, {
         'attr': {
             'class': 'easyui-combotree form-control ' ~ additionalClass,
@@ -24,6 +31,7 @@
             'data-value': dataValue
         }
     }) }}
+    
 {% endmacro %}
 
 {# ============= #}
@@ -41,9 +49,10 @@
 {{ vs_tree.easyuiCombobox( form.parent, comboDataSourceUrl, taxonId,
     {
         'elementSelector': '#user_role_form_parent',
-        'required': true,
-        'multiple': true,
-        'checkbox': true,
+        'required': 'true',
+        'multiple': 'true',
+        'checkbox': 'true',
+        'cascadeCheck': 'false',
         'placeholder': comboTreePlaceholder
     }
 ) }}

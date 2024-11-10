@@ -14,69 +14,77 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 
+use Vankosoft\ApplicationBundle\Component\Context\ApplicationContextInterface;
 use Vankosoft\ApplicationBundle\Twig\Alerts;
+use Vankosoft\UsersBundle\Model\Interfaces\UserInterface;
 
-class MaintenanceListener
+final class MaintenanceListener
 {
-    protected $container;
+    /** @var ContainerInterface */
+    private $container;
     
-    /**
-     * @var Environment $twig
-     */
-    protected $twig;
+    /** @var Environment $twig */
+    private $twig;
     
-    /**
-     * @var FlashBagInterface $flash
-     */
-    protected $flash;
+    /** @var RequestStack */
+    private $requestStack;
     
-    protected $user;
-    protected $applicationId;
-    protected $applicationLayout;
+    /** @var UserInterface */
+    private $user;
+    
+    /** @var ApplicationContextInterface */
+    private $applicationContext;
     
     public function __construct(
         ContainerInterface $container,
         Environment $twig,
         RequestStack $requestStack,
         TokenStorageInterface $tokenStorage,
-        int $applicationId = null,
-        ?string $applicationLayout
+        ApplicationContextInterface $applicationContext
     ) {
-        $this->applicationId        = $applicationId;
-        $this->applicationLayout    = $applicationLayout;
         $this->container            = $container;
         $this->twig                 = $twig;
+        $this->requestStack         = $requestStack;
+        $this->applicationContext   = $applicationContext;
         
-        if ( $requestStack->getMainRequest()->hasSession() ) {
-            $this->flash                = $requestStack->getMainRequest()->getSession()->getFlashBag();
-        } else {
-            $session    = new Session();
-            $session->start();
-            
-            $requestStack->getMainRequest()->setSession( $session );
-        }
-        
-        $token                      = $tokenStorage->getToken();
-        if ( $token ) {
-            $this->user         = $token->getUser();
+        if ( $this->requestStack->getMainRequest() ) {
+            $token  = $tokenStorage->getToken();
+            if ( $token ) {
+                $this->user = $token->getUser();
+            }
         }
     }
     
     //public function onKernelRequest( GetResponseEvent $event )
-    public function onKernelRequest( RequestEvent $event )
+    public function onKernelRequest( RequestEvent $event ): void
     {
-        $debug              = in_array( $this->container->get('kernel')->getEnvironment(), ['dev'] );
-        $settings           = $this->getSettingsManager()->getSettings( $this->applicationId );
+        $request    = $event->getRequest();
+        
+//         $env        = $this->container->get( 'kernel' )->getEnvironment();
+//         $debug      = \in_array( $env, ['dev'] );
+        $debug      = $this->container->get( 'kernel' )->isDebug();
+        
+        $application    = $this->applicationContext->getApplication();
+        $appSettings    = $application->getSettings();
+        if ( $appSettings->isEmpty() ) {
+            return;
+        }
+        $appSettings    = $appSettings[0];
+        //echo '<pre>'; var_dump( $appSettings ); die;
+        
+        $settings   = $this->getSettingsManager()->getSettings( $application->getId() );
+        //echo '<pre>'; var_dump( $settings ); die;
         
         // If maintenance is active and in prod or test  environment and user is not admin
-        if ( $settings['maintenanceMode'] ) {
+        if ( isset( $settings['maintenanceMode'] ) && $settings['maintenanceMode'] ) {
+        //if ( $appSettings->getMaintenanceMode() ) {
             if (
                 ( ! is_object( $this->user ) || ! $this->user->hasRole( 'ROLE_ADMIN' ) )
                 && ! $debug
             ) {
-                $maintenancePage    = $settings['maintenancePage'] ?
-                                        $this->getPagesRepository()->find( $settings['maintenancePage'] ) :
-                                        null;
+                $maintenancePage    = $this->getPagesRepository()->find( $settings['maintenancePage'] );
+                //$maintenancePage    = $appSettings->getMaintenancePage();
+                
                 if ( $maintenancePage ) {
                     $event->setResponse( new Response( $this->renderMaintenancePage( $maintenancePage ), 503 ) );
                 } else {
@@ -85,9 +93,11 @@ class MaintenanceListener
                 
                 $event->stopPropagation();
             } else {
+                $flash  = $request->getSession()->getFlashBag();
+                
                 // Alerts::WARNINGS[]   = 'The System is in Maintenance Mode !';
-                if ( ! $this->flash->has( 'in-maintenance' ) ) { // Check if there is no Flash messages of type "in-maintenance"
-                    $this->flash->add( 'in-maintenance', 'The System is in Maintenance Mode !' );
+                if ( ! $flash->has( 'in-maintenance' ) ) { // Check if there is no Flash messages of type "in-maintenance"
+                    $flash->add( 'in-maintenance', 'The System is in Maintenance Mode !' );
                 }
             }
         }
@@ -105,10 +115,12 @@ class MaintenanceListener
     
     private function renderMaintenancePage( $maintenancePage ): string
     {
-        return $this->twig->render( '@VSCms/Pages/Pages/show.html.twig',
+        //return $this->twig->render( '@VSCms/Pages/Pages/show.html.twig',
+        return $this->twig->render( '@VSApplication/MaintenancePages/cms_page.html.twig',
             [
                 'page'              => $maintenancePage,
-                'applicationLayout' => $this->applicationLayout ?: '@VSApplication/layout.html.twig',
+                'applicationLayout' => '@VSApplication/layout.html.twig',
+                'siteLayout'        => '@VSApplication/layout.html.twig',
                 'inMainenance'      => true,
             ]
         );

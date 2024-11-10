@@ -17,28 +17,34 @@ use Vankosoft\ApplicationBundle\Component\Menu\Item\DividerMenuItem;
 
 class MenuBuilder
 {
+    /** @var AuthorizationChecker */
     protected $security;
     
+    /** @var RouterInterface */
     protected $router;
     
+    /** @var array */
     protected $menuConfig;
     
     protected $request;
     
+    /** @var RequestStack */
     protected $requestStack;
     
-    // ContainerBuilder
+    /** @var ContainerBuilder */
     protected $cb;
     
-    // PathRolesService
+    /** @var PathRolesService */
     protected $pathRolesService;
     
-    // TranslatorInterface
+    /** @var TranslatorInterface */
     protected $translator;
     
+    /** @var FactoryInterface */
     protected FactoryInterface $factory;
     
-    protected $currentUri;
+    /** @var string */
+    protected $currentPath;
     
     public function __construct(
         string $config_file,
@@ -189,7 +195,13 @@ class MenuBuilder
             
             if ( isset( $mg['childs'] ) && is_array( $mg['childs'] ) ) {
                 $isGranted  = $this->build( $menu[$menuName], $mg['childs'] );
-                $child->setDisplay( $isGranted );
+                
+                if ( ! empty( $mg['childs'] ) && ! $isGranted ) {
+                    // Not Sure if this should exist
+                    //$menu->removeChild( $menuName );
+                } else {
+                    $child->setDisplay( $isGranted );
+                }
             }
             
             if ( $path == $this->currentPath ) {

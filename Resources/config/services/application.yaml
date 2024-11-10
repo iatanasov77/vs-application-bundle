@@ -1,9 +1,17 @@
+parameters:
+    vs_application.doctrine_dbal_cache_dsn: '%env(resolve:DATABASE_URL)%'
+
 services:
     _defaults:
         autowire: true
         autoconfigure: true
         public: true
         
+    vs_application.project_type:
+        class: Vankosoft\ApplicationBundle\Component\Application\Project
+        arguments:
+            - '%vs_application.project_type%'
+            
     vs_application.context.application.hostname_based_request_resolver:
         class: Vankosoft\ApplicationBundle\Component\Context\HostnameBasedRequestResolver
         arguments:
@@ -20,10 +28,25 @@ services:
             - { name: 'vs_application.context.application' }
     
     # Create Aliases for Autowiring
+    Vankosoft\ApplicationBundle\Component\Application\Project: '@vs_application.project_type'
     Vankosoft\ApplicationBundle\Component\Context\ApplicationContext: '@vs_application.context.application'
     Vankosoft\ApplicationBundle\Component\Context\ApplicationContextInterface: '@Vankosoft\ApplicationBundle\Component\Context\ApplicationContext'
 
+    vs_application.exception_listener:
+        class: Vankosoft\ApplicationBundle\EventListener\ExceptionListener
+        arguments:
+            - '@twig'
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception }
+    
     vs_application.slug_generator:
         class: Vankosoft\ApplicationBundle\Component\SlugGenerator
         arguments:
             - '@request_stack'
+            
+    vs_application.doctrine_dbal_cache:
+        class: Vankosoft\ApplicationBundle\Component\VsDoctrineDbalCache
+        arguments:
+            - '%vs_application.doctrine_dbal_cache_dsn%'
+
+

@@ -5,12 +5,23 @@ use Vankosoft\ApplicationBundle\Controller\AbstractCrudController;
 use Vankosoft\ApplicationBundle\Component\Slug;
 
 class TaxonomyController extends AbstractCrudController
-{ 
+{
+    protected function customData( Request $request, $entity = null ): array
+    {
+        $translations       = $this->classInfo['action'] == 'indexAction' ? $this->getTranslations() : [];
+        $taxonTranslations  = $this->classInfo['action'] == 'updateAction' ? $this->getTaxonTranslations() : [];
+        
+        return [
+            'translations'      => $translations,
+            'taxonTranslations' => $taxonTranslations,
+        ];
+    }
+    
     protected function prepareEntity( &$entity, &$form, Request $request )
     {
-        $formData   = $request->request->get( 'taxonomy_form' );
+        $taxonomyName   = $request->request->all( 'taxonomy_form' )['name'];
         
-        $entity->setCode( $this->get( 'vs_application.slug_generator' )->generate( $formData['name'] ) );
+        $entity->setCode( $this->get( 'vs_application.slug_generator' )->generate( $taxonomyName ) );
         
         if ( ! $entity->getRootTaxon() ) {
             $entity->setRootTaxon( $this->createRootTaxon( $entity, $request->getLocale() ) );
@@ -34,5 +45,30 @@ class TaxonomyController extends AbstractCrudController
         $rootTaxon->getTranslation()->setTranslatable( $rootTaxon );
         
         return $rootTaxon;
+    }
+    
+    private function getTranslations(): array
+    {
+        $translations   = [];
+        $transRepo      = $this->get( 'vs_application.repository.translation' );
+        
+        foreach ( $this->getRepository()->findAll() as $taxonomy ) {
+            $translations[$taxonomy->getId()] = array_keys( $transRepo->findTranslations( $taxonomy ) );
+        }
+        
+        
+        return $translations;
+    }
+    
+    private function getTaxonTranslations()
+    {
+        $translations   = [];
+        $taxonsRepo   = $this->get( 'vs_application.repository.taxon' );
+        
+        foreach ( $taxonsRepo->findAll() as $taxon ) {
+            $translations[$taxon->getId()] = $taxon->getTranslations()->getKeys();
+        }
+        
+        return $translations;
     }
 }

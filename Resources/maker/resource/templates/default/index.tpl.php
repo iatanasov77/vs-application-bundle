@@ -30,16 +30,22 @@
 <?php endforeach; ?>
                         <td>
                             <div class="btn-group">
-                                <a class="btn btn-primary" href="{{ path('<?= $route_name ?>_show', {'id': item.id}) }}">
+                                <a class="btn btn-primary"
+                                	href="{{ path('<?= $route_name ?>_show', {'id': item.id}) }}"
+                                	title="{{ 'vs_cms.template.button_preview' | trans( {},'VSCmsBundle' ) }}"
+                               	>
                                     <i class="fas fa-eye" style="color: #be4bdb;" ></i>
                                 </a>
-                                <a class="btn btn-primary" href="{{ path('<?= $route_name ?>_update', {'id': item.id}) }}">
+                                <a class="btn btn-primary"
+                                	href="{{ path('<?= $route_name ?>_update', {'id': item.id}) }}"
+                                	title="{{ 'vs_application.template.items_index_row_action_edit' | trans( {},'VSApplicationBundle' ) }}"	
+                               	>
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a class="btn btn-danger btnDelete" 
+                                <a class="btn btn-danger btnDeleteResource" 
                                     href="{{ path('<?= $route_name ?>_delete', {'id': item.id}) }}"
                                     data-csrfToken="{{ csrf_token( item.id ) }}"
-                                    title="Delete"
+                                    title="{{ 'vs_application.template.items_index_row_action_delete' | trans( {},'VSApplicationBundle' ) }}"
                                 >
                                     <i class="icon_close_alt2"></i>
                                 </a>
@@ -48,7 +54,9 @@
                     </tr>
         {% else %}
                     <tr>
-                        <td colspan="<?= (count($entity_fields) + 1) ?>">{{ alerts.info('sylius.ui.there_are_no_mappers_to_display'|trans) }}</td>
+                        <td colspan="<?= (count($entity_fields) + 1) ?>">
+                        	{{ alerts.info( 'vs_application.template.there_are_no_items_to_display' | trans( {},'VSApplicationBundle' ) ) }}
+                        </td>
                     </tr>
         {% endfor %}
                 </tbody>

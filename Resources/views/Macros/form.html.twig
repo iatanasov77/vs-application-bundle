@@ -4,7 +4,31 @@
 	https://twig.symfony.com/doc/3.x/tags/macro.html
 #}
 
-{% macro buttons( form ) %}
+{% macro errors( formErrors ) %}
+
+    {% if formErrors is not empty %}
+        <div class="alert alert-danger mt-4 float-start text-left w-100" role="alert">
+            {% for field, errors in formErrors %}
+                {% for fieldError in errors %}
+                    <p>{{ field }}: {{ fieldError | trans }}</p>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    {#
+    {% if form_errors(form) is not empty %}
+        <div class="alert alert-block alert-danger">
+            <button type="button" class="close close-sm" data-bs-dismiss="alert">
+                <i class="fa fa-times"></i>
+            </button>
+            <strong>{{ 'vs_application.form.errors_title' | trans( {},'VSApplicationBundle' ) }}</strong> {{ form_errors(form) }}
+        </div>
+    {% endif %}
+    #}
+{% endmacro %}
+
+{% macro buttons( form, metadata = null ) %}
 	<div class="row">&nbsp;</div>
 	
     <div class="input-group row vsFormButtonsGroup">
@@ -14,9 +38,13 @@
         <div class="col-sm-2">
             {{ form_widget(form.btnSave, {'attr': {'class': 'btn btn-primary', 'id':'btnSave'}}) }}
         </div>
+        {% if metadata %}
         <div class="col-sm-2">
-            {{ form_widget(form.btnCancel, {'attr': {'class': 'btn btn-default', 'id':'btnCancel'}}) }}
+            <a class="btn btn-default" href="{{ path( metadata.applicationName ~ '_' ~ metadata.name ~ '_index' ) }}">
+                {{ 'vs_application.form.cancel' | trans( {},'VSApplicationBundle' ) }}
+            </a>
         </div>
+        {% endif %}
         <div class="col-sm-6"></div>
     </div>
 {% endmacro %}

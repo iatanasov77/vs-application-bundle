@@ -1,7 +1,7 @@
 <?php namespace Vankosoft\ApplicationBundle\Model\Traits;
 
 use Doctrine\ORM\Mapping as ORM;
-use Vankosoft\UsersBundle\Model\UserInterface;
+use Vankosoft\UsersBundle\Model\Interfaces\UserInterface;
 
 /**
  * @see \Vankosoft\ApplicationBundle\Model\Interfaces\UserAwareInterface
@@ -9,24 +9,27 @@ use Vankosoft\UsersBundle\Model\UserInterface;
 trait UserAwareEntity
 {
     /**
-     * @var \Vankosoft\UsersBundle\Model\UserInterface
+     * @var UserInterface
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\UserManagement\User")
      */
+    #[ORM\ManyToOne(targetEntity: "App\Entity\UserManagement\User")]
     protected $createdBy;
     
     /**
-     * @var \Vankosoft\UsersBundle\Model\UserInterface
+     * @var UserInterface
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\UserManagement\User")
      */
+    #[ORM\ManyToOne(targetEntity: "App\Entity\UserManagement\User")]
     protected $updatedBy;
     
     /**
-     * @var \Vankosoft\UsersBundle\Model\UserInterface
+     * @var UserInterface
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\UserManagement\User")
      */
+    #[ORM\ManyToOne(targetEntity: "App\Entity\UserManagement\User")]
     protected $deletedBy;
     
     public function getCreatedBy() : ?UserInterface
