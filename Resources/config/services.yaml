@@ -11,18 +11,26 @@ imports:
     - { resource: services/commands.yaml }
     - { resource: services/web_profiler.yaml }
     - { resource: services/repository.yaml }
-    - { resource: services/api.yaml }
+    - { resource: services/twig.yaml }
+    - { resource: services/sylius_resource.yaml }
+    - { resource: services/widgets.yaml }
+    - { resource: services/project_issues.yaml }
 
 parameters:
+    applicationIcon: 'build/default/images/superman.svg'
+    applicationTitle: 'vs_application.template.super_admin_panel'
+    hasTopSearch: true
+    
     vs_application.version: !php/const Vankosoft\ApplicationBundle\Component\Application\Kernel::VERSION
     vs_application.public_dir: "%kernel.project_dir%/public/admin-panel"
-    vs_application.settings.application_id: null
-    vs_application.settings.application_layout: null
     vs_application.supress_pdo_exception: false
     vs_application.page_categories.taxonomy_code: 'page-categories'
     vs_application.document_categories.taxonomy_code: 'document-categories'
     vs_application.user_roles.taxonomy_code: 'user-roles'
-    vs_application.mailer_user: 'webmaster@vankosoft.org'
+    vs_application.tags_whitelist_contexts.taxonomy_code: 'tags-whitelist-contexts'
+    vs_application.widgets_groups.taxonomy_code: 'widgets-groups'
+    vs_application.sliders.taxonomy_code: 'sliders'
+    vs_application.mailer_user: '%env(resolve:MAILER_USER)%'
 
 services:
     _defaults:

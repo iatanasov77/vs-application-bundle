@@ -1,5 +1,7 @@
 {% extends "@VSApplication/layout.html.twig" %}
+
 {% import "@VSApplication/Macros/form.html.twig" as vs_form %}
+{% import "@VSApplication/Macros/alerts.html.twig" as alerts %}
 
 {% if( item.id ) %}
 	{% set pageTitle = 'vs_application.template.locales_update_title' | trans( {},'VSApplicationBundle' ) %}
@@ -23,27 +25,19 @@
             <div class="card">
             	<h5 class="card-header">{{ 'vs_application.form.locale' | trans( {},'VSApplicationBundle' ) }}</h5>
             	<div class="card-body">
-					{% if form_errors(form) is not empty %}
-		                <div class="alert alert-block alert-danger fade in">
-		                    <button type="button" class="close close-sm" data-dismiss="alert">
-		                        <i class="icon-remove"></i>
-		                    </button>
-		                    <strong>{{ 'vs_application.form.errors_title' | trans( {},'VSApplicationBundle' ) }}</strong> {{ form_errors(form) }}
-		                </div>
-		            {% endif %}
-		            
-                    {% if(item.id) %}
-                        {% set method = "PUT" %}
-                    {% else %}
-                        {% set method = "POST" %}
+            	
+                    {% if formErrors is defined %}
+                        {{ vs_form.errors( formErrors ) }}     
                     {% endif %}
+		            
+                    {% if(item.id) %}{% set method = "PUT" %}{% else %}{% set method = "POST" %}{% endif %}
                     {{ form_start(form, { 'attr': {'class': 'form-horizontal '}, 'method': method }) }}
                 		<div class="form-group">
-                        	{{ form_label(form.translatableLocale, null, {
+                        	{{ form_label(form.locale, null, {
                                 'label_attr': {'class': 'col-form-label'}
                                 }) 
                             }}
-                            {{ form_widget(form.translatableLocale, {'attr': {'class': 'form-control' }}) }}
+                            {{ form_widget(form.locale, {'attr': {'class': 'form-control' }}) }}
                         </div>
                         <div class="form-group">
                         	{{ form_label(form.code, null, {
@@ -60,7 +54,7 @@
                             {{ form_widget(form.title, {'attr': {'class': 'form-control' }}) }}
                         </div>
                         
-                        {{ vs_form.buttons( form ) }}
+                        {{ vs_form.buttons( form, metadata ) }}
                     {{ form_end(form) }}
         		</div>
 			</div>

@@ -1,4 +1,5 @@
 {% extends "@VSApplication/layout.html.twig" %}
+
 {% import "@VSApplication/Macros/form.html.twig" as vs_form %}
 
 {% if( item.id ) %}
@@ -23,20 +24,12 @@
             <div class="card">
             	<h5 class="card-header">{{ 'vs_application.template.taxonomy_title' | trans( {},'VSApplicationBundle' ) }}</h5>
             	<div class="card-body">
-					{% if form_errors(form) is not empty %}
-		                <div class="alert alert-block alert-danger fade in">
-		                    <button type="button" class="close close-sm" data-dismiss="alert">
-		                        <i class="icon-remove"></i>
-		                    </button>
-		                    <strong>{{ 'vs_application.form.errors_title' | trans( {},'VSApplicationBundle' ) }}</strong> {{ form_errors(form) }}
-		                </div>
-		            {% endif %}
-		            
-                    {% if(item.id) %}
-                        {% set method = "PUT" %}
-                    {% else %}
-                        {% set method = "POST" %}
+            	
+                    {% if formErrors is defined %}
+                        {{ vs_form.errors( formErrors ) }}     
                     {% endif %}
+		            
+                    {% if(item.id) %}{% set method = "PUT" %}{% else %}{% set method = "POST" %}{% endif %}
                     {{ form_start(form, { 'attr': {'class': 'form-horizontal '}, 'method': method }) }}
                 		<div class="form-group">
                         	{{ form_label(form.locale, null, {
@@ -60,16 +53,20 @@
                             {{ form_widget(form.description, {'attr': {'class': 'form-control' }}) }}
                         </div>
                         
-                        {{ vs_form.buttons( form ) }}
+                        {{ vs_form.buttons( form, metadata ) }}
                     {{ form_end(form) }}
         		</div>
 			</div>
 			{% if( item.id ) %}
 				<div class="card">
 	                <div class="card-header">
-                        <div class="float-left" style="height:30px; padding-top:10px;">Taxonomy Taxons</div>
-                        <div class="btn-group float-right">
-                            <a class="btn btn-primary btnTaxonomyTaxon" title="Create New Taxon" href="javascript:void(0);" 
+                        <div class="float-start" style="height:30px; padding-top:10px;">
+                            {{ 'vs_application.template.taxonomy_update_list_taxons_title' | trans( {},'VSApplicationBundle' ) }}
+                        </div>
+                        <div class="btn-group float-end">
+                            <a class="btn btn-primary btnTaxonomyTaxon"
+                                title="{{ 'vs_application.template.button_create_taxon' | trans( {},'VSApplicationBundle' ) }}"
+                                href="javascript:void(0);" 
                             	data-url="{{ path('vs_application_taxonomy_taxon_edit', {'taxonomyId': item.id}) }}"
                             	data-easyui-url="{{ path( 'vs_application_taxonomy_taxons_easyui_combotree', {'taxonomyId': item.id} ) }}"
                             >
@@ -78,12 +75,11 @@
                         </div>
                     </div>
                     <div class="card-body" style="padding: 0;">
-                        <!--  http://gtreetable.gilek.net/ -->
-                        <table class="table gtreetable"
-                               id="tableTaxons"
-                               data-url="{{ url('vs_application_taxonomy_taxons_gtreetable', {'taxonomyId': item.id}) }}"
-                        >
-                        </table>
+                        {% if item.rootTaxon.children|length > 0 %}
+                            {% include '@VSApplication/Pages/Taxonomy/partial/simpleTreeTable.html.twig' %}
+                        {% else %}
+                            {{ alerts.info( 'vs_application.template.there_are_no_items_to_display' | trans( {},'VSApplicationBundle' ) ) }}
+                        {% endif %}
                     </div>
 				</div>
 			{% endif %}

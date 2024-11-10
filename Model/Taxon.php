@@ -4,14 +4,20 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Comparable;
 use Sylius\Component\Taxonomy\Model\Taxon as BaseTaxon;
+
+/** Use Sylius Interfaces for Parameter and Return Types For Parent Models Compatibility */
 use Sylius\Component\Taxonomy\Model\TaxonInterface;
 use Sylius\Component\Taxonomy\Model\TaxonTranslationInterface;
+// use Vankosoft\ApplicationBundle\Model\Interfaces\TaxonInterface;
+// use Vankosoft\ApplicationBundle\Model\Interfaces\TaxonTranslationInterface;
 
 use Vankosoft\ApplicationBundle\Model\Interfaces\TaxonInterface as VsTaxonInterface;
-use Vankosoft\CmsBundle\Model\FileInterface;
+use Vankosoft\ApplicationBundle\Model\Interfaces\TaxonomyInterface;
+use Vankosoft\CmsBundle\Model\Interfaces\FileInterface;
 
 class Taxon extends BaseTaxon implements VsTaxonInterface, Comparable
 {
+    /** @var TaxonomyInterface */
     protected $taxonomy;
     
     /**
@@ -94,9 +100,19 @@ class Taxon extends BaseTaxon implements VsTaxonInterface, Comparable
         }
     }
     
+    /**
+     * {@inheritDoc}
+     * @see \Doctrine\Common\Comparable::compareTo($other)
+     */
     public function compareTo($other): int
     {
-        return $this->code === $other->getCode() ? 0 : 1;
+        if ( $this->code === $other->getCode() ) {
+            return 0;
+        } elseif ( $this->getParent() && $this->getParent()->getCode() === $other->getCode() ) {
+            return -1;
+        } else {
+            return 1;
+        }
     }
     
     public function getExistingTranslations()

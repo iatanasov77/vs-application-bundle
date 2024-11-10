@@ -7,7 +7,9 @@ services:
     vs_application.data_collector.core:
         class: Vankosoft\ApplicationBundle\DataCollector\VsApplicationCollector
         arguments:
-            - '@request_stack'
+            - '@vs_application.project_type'
+            - '@vs_application.repository.locale'
+            - '@vs_application_instalator.repository.instalation_info'
             - '%vs_application.version%'
             - '%kernel.bundles%'
             - '%locale%'
