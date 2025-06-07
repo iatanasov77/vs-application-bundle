@@ -10,6 +10,7 @@ use Sylius\Component\Resource\Factory\Factory;
 use Sylius\Bundle\ResourceBundle\Doctrine\ORM\EntityRepository;
 
 use Vankosoft\ApplicationBundle\Component\Application\Project;
+use Vankosoft\ApplicationBundle\Component\ProjectIssue\ProjectIssue;
 
 use Vankosoft\ApplicationBundle\Model\Locale;
 use Vankosoft\ApplicationBundle\Controller\LocalesController;
@@ -93,21 +94,6 @@ class Configuration implements ConfigurationInterface
                     ->scalarPrototype()->end()
                 ->end()
                 ->scalarNode( 'locale' )->defaultValue( 'en_US' )->cannotBeEmpty()->end()
-                ->arrayNode( 'vankosoft_api' )
-                    ->addDefaultsIfNotSet()
-                    ->children()
-                        ->booleanNode( 'enabled' )->defaultFalse()->end()
-                        ->scalarNode( 'project' )->defaultValue( 'not_defined' )->cannotBeEmpty()->end()
-                        ->arrayNode( 'connection' )
-                            ->addDefaultsIfNotSet()
-                            ->children()
-                                ->scalarNode( 'host' )->defaultValue( 'http://api.vankosoft.org/api' )->cannotBeEmpty()->end()
-                                ->scalarNode( 'user' )->defaultValue( 'admin' )->cannotBeEmpty()->end()
-                                ->scalarNode( 'password' )->defaultValue( 'admin' )->cannotBeEmpty()->end()
-                            ->end()
-                        ->end()
-                    ->end()
-                ->end()
             ->end()
         ;
         

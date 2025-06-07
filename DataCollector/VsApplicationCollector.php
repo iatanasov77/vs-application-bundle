@@ -3,7 +3,7 @@
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 use Doctrine\DBAL\Exception\TableNotFoundException;
 use Doctrine\DBAL\Exception\ConnectionException;
-use Sylius\Component\Resource\Repository\RepositoryInterface;
+use Sylius\Resource\Doctrine\Persistence\RepositoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -103,7 +103,7 @@ final class VsApplicationCollector extends DataCollector
         return $this->data['default_locale_code'];
     }
     
-    public function collect( Request $request, Response $response, \Throwable $exception = null )
+    public function collect( Request $request, Response $response, ?\Throwable $exception = null ): void
     {
         $currentLocale  = $request->getLocale();
         $locales        = [];

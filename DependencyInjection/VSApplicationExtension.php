@@ -18,7 +18,7 @@ class VSApplicationExtension extends AbstractResourceExtension implements Prepen
     /**
      * {@inheritDoc}
      */
-    public function load( array $config, ContainerBuilder $container )
+    public function load( array $config, ContainerBuilder $container ): void
     {
         $config = $this->processConfiguration( $this->getConfiguration([], $container), $config );
         $this->prepend( $container );
@@ -39,13 +39,6 @@ class VSApplicationExtension extends AbstractResourceExtension implements Prepen
         // Set values need to be accesible from controller
         $container->setParameter( 'vs_application.project_type', $config[ 'project_type' ] );
         $container->setParameter( 'vs_application.taxonomy', $config[ 'taxonomy' ] );
-        
-        // VankoSoft API
-        $container->setParameter( 'vs_application.vankosoft_api.enabled', $config[ 'vankosoft_api' ]['enabled'] );
-        $container->setParameter( 'vs_application.vankosoft_api.project', $config[ 'vankosoft_api' ]['project'] );
-        $container->setParameter( 'vs_application.vankosoft_api.host', $config[ 'vankosoft_api' ]['connection']['host'] );
-        $container->setParameter( 'vs_application.vankosoft_api.user', $config[ 'vankosoft_api' ]['connection']['user'] );
-        $container->setParameter( 'vs_application.vankosoft_api.password', $config[ 'vankosoft_api' ]['connection']['password'] );
     }
     
     public function prepend( ContainerBuilder $container ): void
@@ -61,7 +54,7 @@ class VSApplicationExtension extends AbstractResourceExtension implements Prepen
         $debugArray = $container->getExtensionConfig( $extension );
         
         $fileLocator = new FileLocator( $container->getParameter( 'kernel.project_dir' ) );
-        $debugArray['MigrationsPath'] = $fileLocator->locate("@VSApplicationBundle/DoctrineMigrations");
+        $debugArray['MigrationsPath'] = $fileLocator->locate( "@VSApplicationBundle/DoctrineMigrations" );
         
         return $debugArray;
     }

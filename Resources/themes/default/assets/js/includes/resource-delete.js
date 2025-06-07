@@ -17,7 +17,7 @@ var onResourceDeleteCancel  = function() {
     $( this ).dialog( "close" );
 }
 
-export function VsFormDlete( onOk, onCancel, message = null )
+export function VsFormDelete( onOk, onCancel, message = null )
 {
     var myButtons           = {};
     var _Translator         = VsTranslator( 'VSApplicationBundle' );
@@ -30,7 +30,6 @@ export function VsFormDlete( onOk, onCancel, message = null )
     
     return $( translatedDialog ).dialog( { buttons: myButtons } );
 }
-
 
 /*
  * I'm not sure if this should work. This is an old implementation
@@ -46,6 +45,6 @@ $( function()
 	    $( '#resource_delete__redirect' ).val( $( this ).attr( 'data-redirectUrl' ) );
 	    
 	    var message    = $( this ).attr( 'data-message' );
-	    var dialog     = VsFormDlete( onResourceDeleteOk, onResourceDeleteCancel, message );
+	    var dialog     = VsFormDelete( onResourceDeleteOk, onResourceDeleteCancel, message );
 	});
 });
