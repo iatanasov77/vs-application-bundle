@@ -13,24 +13,13 @@ class LocalesController extends AbstractCrudController
         ];
     }
     
-    protected function prepareEntity( &$entity, &$form, Request $request )
+    protected function prepareEntity( &$entity, &$form, Request $request ): void
     {
-        $formPost   = $request->getContent();
+        $formPost   = $request->request->all( 'locale_form' );
+        $formLocale = $formPost['locale'];
         
-        if ( isset( $formPost['translatableLocale'] ) ) {
-            $entity->setTranslatableLocale( $formPost['translatableLocale'] );
+        if ( $formLocale ) {
+            $entity->setTranslatableLocale( $formLocale );
         }
-    }
-    
-    private function getTranslations(): array
-    {
-        $translations   = [];
-        $transRepo      = $this->get( 'vs_application.repository.translation' );
-        
-        foreach ( $this->getRepository()->findAll() as $locale ) {
-            $translations[$locale->getId()] = array_keys( $transRepo->findTranslations( $locale ) );
-        }
-        
-        return $translations;
     }
 }

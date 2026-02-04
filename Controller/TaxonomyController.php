@@ -17,7 +17,7 @@ class TaxonomyController extends AbstractCrudController
         ];
     }
     
-    protected function prepareEntity( &$entity, &$form, Request $request )
+    protected function prepareEntity( &$entity, &$form, Request $request ): void
     {
         $taxonomyName   = $request->request->all( 'taxonomy_form' )['name'];
         
@@ -46,19 +46,6 @@ class TaxonomyController extends AbstractCrudController
         $rootTaxon->getTranslation()->setTranslatable( $rootTaxon );
         
         return $rootTaxon;
-    }
-    
-    private function getTranslations(): array
-    {
-        $translations   = [];
-        $transRepo      = $this->get( 'vs_application.repository.translation' );
-        
-        foreach ( $this->getRepository()->findAll() as $taxonomy ) {
-            $translations[$taxonomy->getId()] = array_keys( $transRepo->findTranslations( $taxonomy ) );
-        }
-        
-        
-        return $translations;
     }
     
     private function getTaxonTranslations()
